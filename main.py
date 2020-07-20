@@ -1,32 +1,13 @@
-import argparse
 import os
 import requests
 import sys
+from tqdm import tqdm
 
 from bs4 import BeautifulSoup as bs
 
 # check for proper command line arguments
-parser = argparse.ArgumentParser(
-    prog='PROGRAM',
-    description='Download images from Google.',
-    usage='%(prog)s search-query num_of_images'
-)
-
-parser.add_argument(
-    'search_query',
-    help='query for google image search'
-)
-
-parser.add_argument(
-    'num_of_images',
-    type=int,
-    help='amount of images needed'
-)
-
-# store arguments in object
-args = parser.parse_args()
-QUERY = args.search_query
-NUM_IMAGES = args.num_of_images
+import arg_manager
+QUERY, NUM_IMAGES = arg_manager.parser()
 
 # google image url
 GOOGLE_IMAGE = \
@@ -51,7 +32,6 @@ def main():
         download_images()
     except OSError as error:
         print(error)
-
 
 def download_images():
     print('Starting search...')
@@ -81,7 +61,14 @@ def download_images():
             break
 
     print(f'\nFound {len(image_links)} images.')
-    print('Starting download...')
+
+    # progress bar
+    bar = tqdm(
+        total=NUM_IMAGES,
+        desc='Downloading images... ',
+        unit=' images',
+        ascii=True
+    )
 
     for i, link in enumerate(image_links):
         response = requests.get(link)
@@ -91,8 +78,11 @@ def download_images():
         # write link data to new file
         with open(imagename, 'wb') as file:
             file.write(response.content)
+        
+        bar.update(1)
 
-    print(f'\n{len(image_links)} images saved to {os.path.join(SAVE_FOLDER, str(QUERY))} directory.')
+    bar.close()
+    print(f'\n{len(image_links)} images saved to ./{SAVE_FOLDER} directory.')
 
 if __name__ == '__main__':
     main()
