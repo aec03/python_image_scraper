@@ -1,12 +1,9 @@
-import os
 import argparse
-import json
+import os
 import requests
-import shutil
 import sys
 
 from bs4 import BeautifulSoup as bs
-from urllib.request import urlopen
 
 # check for proper command line arguments
 parser = argparse.ArgumentParser(
@@ -46,13 +43,11 @@ usr_agent = {
 }
 
 # name of output directory
-SAVE_FOLDER = 'imgs'
-IMG_FOLDER = os.path.join(SAVE_FOLDER, str(QUERY))
+SAVE_FOLDER = str(QUERY)
 
 def main():
     try:
         os.mkdir(SAVE_FOLDER)
-        os.mkdir(IMG_FOLDER)
         download_images()
     except OSError as error:
         print(error)
@@ -91,7 +86,7 @@ def download_images():
     for i, link in enumerate(image_links):
         response = requests.get(link)
 
-        imagename = os.path.join(SAVE_FOLDER, str(QUERY), f'images_{i}.jpg')
+        imagename = os.path.join(SAVE_FOLDER, f'images_{i}.jpg')
 
         # write link data to new file
         with open(imagename, 'wb') as file:
